@@ -8,7 +8,7 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBDDfjiiNIIvQ5uZNIjiAGLXSFKLN3ziM8Hga31OeSUBea73Qk6gz9BsjENPGyo7ieUQ/exec';
 
 // ── Límites ──────────────────────────────────────────────────────────────────
-const MAX_FILES        = 30;          // máximo de fotos por sesión
+const MAX_FILES        = 10;          // máximo de fotos por sesión
 const MAX_SIZE_MB      = 15;          // tamaño máximo por archivo (MB)
 const COMPRESS_MAX_PX  = 1920;        // lado más largo tras comprimir (px)
 const COMPRESS_QUALITY = 0.82;        // calidad JPEG (0–1)
