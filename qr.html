@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar QR — Fotos de la Boda</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="Styles.css">
+
+    <!-- Librería QR Code (local, no requiere internet) -->
+    <script src="qrcode.min.js"></script>
+
+    <style>
+        body {
+            background: #faf8f4;
+            font-family: var(--font-family-primary);
+        }
+
+        .qr-page {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: var(--spacing-3xl) var(--spacing-md);
+        }
+
+        /* ── Encabezado ── */
+        .qr-header {
+            text-align: center;
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .qr-header__eyebrow {
+            font-size: var(--font-size-xs);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--color-gray-600);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .qr-header__title {
+            font-family: var(--font-family-display);
+            font-size: var(--font-size-3xl);
+            color: var(--color-secondary-dark);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .qr-header__desc {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+            line-height: var(--line-height-relaxed);
+        }
+
+        /* ── Tarjeta de configuración ── */
+        .qr-config-card {
+            background: #ffffff;
+            border-radius: var(--radius-2xl);
+            border: 1px solid #e8d9c5;
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .qr-config-card__label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-secondary-dark);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .qr-config-card__input {
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: 2px solid var(--color-gray-300);
+            border-radius: var(--radius-lg);
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-sm);
+            color: var(--color-secondary-dark);
+            background: #faf8f4;
+            transition: border-color var(--transition-fast);
+            box-sizing: border-box;
+        }
+
+        .qr-config-card__input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: #ffffff;
+        }
+
+        .qr-config-card__hint {
+            font-size: var(--font-size-xs);
+            color: var(--color-gray-500);
+            margin-top: var(--spacing-xs);
+        }
+
+        .qr-config-card__row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        @media (max-width: 480px) {
+            .qr-config-card__row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .qr-generate-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            width: 100%;
+            margin-top: var(--spacing-xl);
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: var(--color-primary);
+            color: var(--color-white);
+            border-radius: var(--radius-full);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-md);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-lg);
+            font-family: var(--font-family-primary);
+        }
+
+        .qr-generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            background: var(--color-primary-dark);
+        }
+
+        .qr-generate-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ── Resultado del QR ── */
+        .qr-result {
+            display: none;
+        }
+
+        .qr-result--visible {
+            display: block;
+        }
+
+        /* Tarjeta imprimible del QR */
+        .qr-card {
+            background: #ffffff;
+            border-radius: var(--radius-2xl);
+            border: 2px solid rgba(212,175,122,0.5);
+            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-3xl) var(--spacing-2xl);
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent), var(--color-primary));
+        }
+
+        .qr-card__top-label {
+            font-size: var(--font-size-xs);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--color-gray-500);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .qr-card__title {
+            font-family: var(--font-family-display);
+            font-size: var(--font-size-2xl);
+            color: var(--color-secondary-dark);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .qr-card__subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .qr-card__qr-wrapper {
+            display: inline-block;
+            padding: var(--spacing-lg);
+            background: #fff;
+            border-radius: var(--radius-xl);
+            border: 2px solid rgba(212,175,122,0.4);
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-md);
+        }
+
+        .qr-card__qr-wrapper canvas,
+        .qr-card__qr-wrapper img {
+            display: block;
+            border-radius: var(--radius-md);
+        }
+
+        .qr-card__instruction {
+            font-size: var(--font-size-md);
+            color: var(--color-secondary);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .qr-card__instruction-detail {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-500);
+            line-height: var(--line-height-relaxed);
+        }
+
+        .qr-card__divider {
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+            margin: var(--spacing-lg) auto;
+        }
+
+        .qr-card__names {
+            font-family: var(--font-family-display);
+            font-size: var(--font-size-xl);
+            color: var(--color-accent-dark);
+        }
+
+        .qr-card__date {
+            font-size: var(--font-size-xs);
+            color: var(--color-gray-500);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Botones de acción post-generación */
+        .qr-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        @media (max-width: 480px) {
+            .qr-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .qr-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-full);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-family: var(--font-family-primary);
+            border: none;
+        }
+
+        .qr-action-btn--primary {
+            background: var(--color-secondary);
+            color: var(--color-white);
+            box-shadow: var(--shadow-md);
+        }
+
+        .qr-action-btn--primary:hover {
+            background: var(--color-secondary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .qr-action-btn--outline {
+            background: transparent;
+            color: var(--color-primary);
+            border: 2px solid var(--color-primary);
+        }
+
+        .qr-action-btn--outline:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        /* URL generada */
+        .qr-url-display {
+            background: #faf8f4;
+            border: 1px solid #e8d9c5;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md) var(--spacing-lg);
+            font-size: var(--font-size-xs);
+            color: var(--color-primary);
+            word-break: break-all;
+            font-family: var(--font-family-monospace);
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        /* ── Estilos de impresión ── */
+        @media print {
+            .qr-header,
+            .qr-config-card,
+            .qr-actions,
+            .qr-url-display,
+            .no-print {
+                display: none !important;
+            }
+
+            .qr-page {
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .qr-result {
+                display: block !important;
+            }
+
+            .qr-card {
+                border: 2px solid #d4af7a;
+                box-shadow: none;
+                margin: 0;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="qr-page">
+
+        <!-- Encabezado -->
+        <header class="qr-header no-print">
+            <p class="qr-header__eyebrow">Herramienta para el organizador</p>
+            <h1 class="qr-header__title">Generador de QR</h1>
+            <p class="qr-header__desc">
+                Genera el código QR que pondrás en las mesas.<br>
+                Los invitados lo escanean y pueden subir sus fotos directamente.
+            </p>
+        </header>
+
+        <!-- Tarjeta de configuración -->
+        <div class="qr-config-card no-print">
+            <label class="qr-config-card__label" for="siteUrl">
+                🔗 URL de tu página de subida (GitHub Pages)
+            </label>
+            <input
+                type="url"
+                id="siteUrl"
+                class="qr-config-card__input"
+                placeholder="https://mesaunr97.github.io/FOTOS_BODA/"
+                autocomplete="off"
+                spellcheck="false"
+            >
+            <p class="qr-config-card__hint">
+                https://mesaunr97.github.io/FOTOS_BODA/upload.html
+            </p>
+
+            <div class="qr-config-card__row">
+                <div>
+                    <label class="qr-config-card__label" for="coupleNames">Esau & Gala </label>
+                    <input
+                        type="text"
+                        id="coupleNames"
+                        class="qr-config-card__input"
+                        placeholder="Manuel &amp; Esaú"
+                        value="Manuel &amp; Esaú"
+                    >
+                </div>
+                <div>
+                    <label class="qr-config-card__label" for="weddingDate"> 20 de Marzo del 2027 </label>
+                    <input
+                        type="text"
+                        id="weddingDate"
+                        class="qr-config-card__input"
+                        placeholder="15 · Diciembre · 2025"
+                        value="15 · Diciembre · 2025"
+                    >
+                </div>
+            </div>
+
+            <button class="qr-generate-btn" id="generateBtn">
+                <span>✨</span>
+                <span>Generar Código QR</span>
+            </button>
+        </div>
+
+        <!-- Resultado -->
+        <div class="qr-result" id="qrResult">
+
+            <!-- URL generada (sin imprimir) -->
+            <div class="qr-url-display no-print" id="qrUrlDisplay"></div>
+
+            <!-- Tarjeta imprimible -->
+            <div class="qr-card" id="qrCard">
+                <p class="qr-card__top-label">Escanea y comparte tus fotos</p>
+                <h2 class="qr-card__title" id="qrCardTitle">Manuel &amp; Esaú</h2>
+                <p class="qr-card__subtitle">Captura los recuerdos de esta noche especial</p>
+
+                <div class="qr-card__qr-wrapper">
+                    <div id="qrContainer"></div>
+                </div>
+
+                <p class="qr-card__instruction">📷 Escanea con la cámara de tu celular</p>
+                <p class="qr-card__instruction-detail">
+                    Sube tus fotos directamente — sin apps, sin registro
+                </p>
+
+                <div class="qr-card__divider"></div>
+
+                <p class="qr-card__names" id="qrCardNames">Manuel &amp; Esaú</p>
+                <p class="qr-card__date" id="qrCardDate">15 · Diciembre · 2025</p>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="qr-actions no-print">
+                <button class="qr-action-btn qr-action-btn--primary" id="downloadBtn">
+                    <span>⬇️</span> Descargar QR (PNG)
+                </button>
+                <button class="qr-action-btn qr-action-btn--outline" onclick="window.print()">
+                    <span>🖨️</span> Imprimir QR
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const generateBtn  = document.getElementById('generateBtn');
+        const downloadBtn  = document.getElementById('downloadBtn');
+        const qrResult     = document.getElementById('qrResult');
+        const qrUrlDisplay = document.getElementById('qrUrlDisplay');
+        const qrContainer  = document.getElementById('qrContainer');
+        const qrCardTitle  = document.getElementById('qrCardTitle');
+        const qrCardNames  = document.getElementById('qrCardNames');
+        const qrCardDate   = document.getElementById('qrCardDate');
+
+        let qrInstance = null; // guarda la instancia para poder regenerar
+
+        generateBtn.addEventListener('click', generateQR);
+        downloadBtn.addEventListener('click', downloadQR);
+
+        function generateQR() {
+            const url   = document.getElementById('siteUrl').value.trim();
+            const names = document.getElementById('coupleNames').value.trim() || 'Los Novios';
+            const date  = document.getElementById('weddingDate').value.trim();
+
+            if (!url) {
+                alert('Por favor ingresa la URL de tu página de GitHub Pages.');
+                document.getElementById('siteUrl').focus();
+                return;
+            }
+
+            if (!url.startsWith('http')) {
+                alert('La URL debe comenzar con https://');
+                document.getElementById('siteUrl').focus();
+                return;
+            }
+
+            // Actualizar textos de la tarjeta
+            qrCardTitle.textContent  = names;
+            qrCardNames.textContent  = names;
+            qrCardDate.textContent   = date;
+            qrUrlDisplay.textContent = url;
+
+            // Limpiar QR anterior si existe
+            qrContainer.innerHTML = '';
+
+            // Generar QR con qrcodejs — usa new QRCode(elemento, opciones)
+            try {
+                qrInstance = new QRCode(qrContainer, {
+                    text:           url,
+                    width:          280,
+                    height:         280,
+                    colorDark:      '#3a2817',
+                    colorLight:     '#ffffff',
+                    correctLevel:   QRCode.CorrectLevel.H
+                });
+
+                qrResult.classList.add('qr-result--visible');
+                qrResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (err) {
+                alert('Error al generar el QR: ' + err.message);
+            }
+        }
+
+        function downloadQR() {
+            const names = document.getElementById('coupleNames').value.trim() || 'boda';
+
+            // qrcodejs genera un <canvas> y un <img> dentro del contenedor
+            const qrImg = qrContainer.querySelector('img');
+            const qrCvs = qrContainer.querySelector('canvas');
+
+            // Preferir canvas (más nítido), fallback a img
+            const source = qrCvs || qrImg;
+            if (!source) {
+                alert('Primero genera el QR.');
+                return;
+            }
+
+            // Crear canvas de alta resolución con borde decorativo
+            const size   = 600;
+            const pad    = 48;
+            const canvas = document.createElement('canvas');
+            canvas.width  = size;
+            canvas.height = size + 100;
+
+            const ctx = canvas.getContext('2d');
+
+            // Fondo blanco
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Borde dorado
+            ctx.strokeStyle = '#d4af7a';
+            ctx.lineWidth   = 4;
+            ctx.beginPath();
+            ctx.roundRect(8, 8, canvas.width - 16, canvas.height - 16, 16);
+            ctx.stroke();
+
+            // Dibujar el QR escalado
+            ctx.drawImage(source, pad, pad, size - pad * 2, size - pad * 2);
+
+            // Texto inferior
+            ctx.fillStyle = '#5a3825';
+            ctx.font      = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Escanea y sube tus fotos', size / 2, size + 40);
+
+            ctx.fillStyle = '#6c757d';
+            ctx.font      = '16px sans-serif';
+            ctx.fillText(names, size / 2, size + 70);
+
+            // Descargar
+            const link      = document.createElement('a');
+            link.download   = 'QR-fotos-boda.png';
+            link.href       = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
